@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>GCP Identity Platform Login</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+</head>
+
+<body>
+    <h2>Login Demo</h2>
+
+    <button id="googleLoginBtn">Login with Google</button>
+
+    <h3>Email Signup</h3>
+    <input id="emailSignup" placeholder="Email">
+    <input id="passwordSignup" placeholder="Password" type="password">
+    <button id="signupBtn">Sign Up</button>
+
+    <h3>Email Login</h3>
+    <input id="emailLogin" placeholder="Email">
+    <input id="passwordLogin" placeholder="Password" type="password">
+    <button id="loginBtn">Login</button>
+
+    <pre id="result"></pre>
+
+    <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    async function sendTokenToBackend(idToken) {
+      const response = await fetch("/auth/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: idToken })
+      });
+      const data = await response.json();
+      document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+    }
+
+    document.getElementById("googleLoginBtn").onclick = async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await auth.signInWithPopup(provider);
+      const idToken = await result.user.getIdToken();
+      sendTokenToBackend(idToken);
+    };
+
+    document.getElementById("signupBtn").onclick = async () => {
+      const email = document.getElementById("emailSignup").value;
+      const password = document.getElementById("passwordSignup").value;
+      const result = await auth.createUserWithEmailAndPassword(email, password);
+      const idToken = await result.user.getIdToken();
+      sendTokenToBackend(idToken);
+    };
+
+    document.getElementById("loginBtn").onclick = async () => {
+      const email = document.getElementById("emailLogin").value;
+      const password = document.getElementById("passwordLogin").value;
+      const result = await auth.signInWithEmailAndPassword(email, password);
+      const idToken = await result.user.getIdToken();
+      sendTokenToBackend(idToken);
+    };
+    </script>
+</body>
+</html>

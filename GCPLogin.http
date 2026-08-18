@@ -1,0 +1,6 @@
+@GCPLogin_HostAddress = http://localhost:5220
+
+GET {{GCPLogin_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
